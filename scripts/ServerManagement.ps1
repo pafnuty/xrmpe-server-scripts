@@ -88,11 +88,16 @@ function Prepare-ServerDataFiles {
 
   # Полный путь к папке с данными сервера
   $serverDataPath = Join-Path -Path $ServersDataPath -ChildPath "$($Server.ConfigPrefix)_server"
+  Write-DebugLog "Подготовка файлов для сервера $($Server.Name) (ConfigPrefix: $($Server.ConfigPrefix))" -Color "Magenta"
+  Write-DebugLog "Путь к данным сервера: $serverDataPath" -Color "Magenta"
 
   # Проверка и создание папки сервера, если она не существует
   if (-not (Test-Path -Path $serverDataPath)) {
       Write-Host "    Создание папки для данных сервера: $serverDataPath" -ForegroundColor Gray
       New-Item -Path $serverDataPath -ItemType Directory -Force | Out-Null
+  }
+  else {
+      Write-DebugLog "Папка для данных сервера уже существует: $serverDataPath" -Color "Green"
   }
 
   # Путь к файлу user.ltx
@@ -101,6 +106,7 @@ function Prepare-ServerDataFiles {
   # Проверка и создание файла user.ltx, если он не существует
   if (-not (Test-Path -Path $userLtxPath)) {
       Write-Host "    Создание файла user.ltx" -ForegroundColor Gray
+      Write-DebugLog "Создание файла user.ltx: $userLtxPath" -Color "Magenta"
       $userLtxContent = @"
 _preset Default
 ai_aim_max_angle 0.7854
@@ -472,6 +478,9 @@ wpn_aim_toggle 0
 "@
       $userLtxContent | Set-Content -Path $userLtxPath -Encoding UTF8
   }
+  else {
+      Write-DebugLog "Файл user.ltx уже существует: $userLtxPath" -Color "Green"
+  }
 
   # Создание пустых файлов banned_list.ltx и banned_list_ip.ltx
   $bannedListPath = Join-Path -Path $serverDataPath -ChildPath "banned_list.ltx"
@@ -479,12 +488,20 @@ wpn_aim_toggle 0
 
   if (-not (Test-Path -Path $bannedListPath)) {
       Write-Host "    Создание файла banned_list.ltx" -ForegroundColor Gray
+      Write-DebugLog "Создание файла banned_list.ltx: $bannedListPath" -Color "Magenta"
       "" | Set-Content -Path $bannedListPath -Encoding UTF8
+  }
+  else {
+      Write-DebugLog "Файл banned_list.ltx уже существует: $bannedListPath" -Color "Green"
   }
 
   if (-not (Test-Path -Path $bannedListIpPath)) {
       Write-Host "    Создание файла banned_list_ip.ltx" -ForegroundColor Gray
+      Write-DebugLog "Создание файла banned_list_ip.ltx: $bannedListIpPath" -Color "Magenta"
       "" | Set-Content -Path $bannedListIpPath -Encoding UTF8
+  }
+  else {
+      Write-DebugLog "Файл banned_list_ip.ltx уже существует: $bannedListIpPath" -Color "Green"
   }
 
   # Создание файла radmins.ltx если у сервера есть записи в radmins
@@ -492,6 +509,8 @@ wpn_aim_toggle 0
       $radminsPath = Join-Path -Path $serverDataPath -ChildPath "radmins.ltx"
 
       Write-Host "    Создание файла radmins.ltx" -ForegroundColor Gray
+      Write-DebugLog "Создание файла radmins.ltx: $radminsPath" -Color "Magenta"
+      Write-DebugLog "Количество радминов: $($Server.Radmins.Count)" -Color "Magenta"
 
       # Начало файла radmins.ltx
       $radminsContent = "[radmins]"
@@ -503,6 +522,9 @@ wpn_aim_toggle 0
 
       # Запись содержимого в файл
       $radminsContent | Set-Content -Path $radminsPath -Encoding UTF8
+  }
+  else {
+      Write-DebugLog "У сервера $($Server.Name) нет радминов, файл radmins.ltx не создается" -Color "Yellow"
   }
 
   return $serverDataPath

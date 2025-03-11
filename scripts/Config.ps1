@@ -1,5 +1,5 @@
 # Config.ps1
-# Модуль для работы с конфигурац��ей
+# Модуль для работы с конфигурацией
 
 # Функция для создания конфигурации по умолчанию
 function New-DefaultConfig {
@@ -19,21 +19,21 @@ function New-DefaultConfig {
       # Настройки уведомлений Discord
       discordWebhookUrl = $global:DEFAULT_DISCORD_WEBHOOK_URL
       restartNotificationThreshold = $global:DEFAULT_RESTART_NOTIFICATION_THRESHOLD
-      # Конфигурация серверов
-      servers = @(
-          @{
-            name="myServer_1";
-            port=5100;
-            configPrefix="s01";
-            radmins=@()
-          },
-          @{
-            name="myServer_2";
-            port=5200;
-            configPrefix="s02";
-            radmins=@()
-          }
-      )
+    # Конфигурация серверов
+    servers = @(
+        @{
+          name="myServer_1";
+          port=5100;
+          configPrefix="s01";
+          radmins=@()
+        },
+        @{
+          name="myServer_2";
+          port=5200;
+          configPrefix="s02";
+          radmins=@()
+        }
+    )
   }
 
   return $defaultConfig
