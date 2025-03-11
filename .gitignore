@@ -1,0 +1,4 @@
+.idea
+/app_datas
+*.log
+servers_config.json
