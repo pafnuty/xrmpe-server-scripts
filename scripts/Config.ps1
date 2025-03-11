@@ -21,12 +21,8 @@ function New-DefaultConfig {
       restartNotificationThreshold = $global:DEFAULT_RESTART_NOTIFICATION_THRESHOLD
       # Конфигурация серверов
       servers = @(
-          @{name="u_01"; port=5100; configPrefix="01"}
-          @{name="u_02"; port=5200; configPrefix="02"}
-          @{name="u_03"; port=5300; configPrefix="03"}
-          @{name="u_04"; port=5400; configPrefix="04"}
-          @{name="u_05"; port=5500; configPrefix="05"}
-          @{name="u_06"; port=5600; configPrefix="06"}
+          @{name="myServer_01"; port=5100; configPrefix="s01"}
+          @{name="myServer_02"; port=5200; configPrefix="s02"}
       )
   }
   
