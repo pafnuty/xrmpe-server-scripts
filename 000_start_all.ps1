@@ -25,8 +25,9 @@ $global:SERVER_STARTUP_DELAY = 3  # Задержка после запуска �
 
 # Константы для настроек по умолчанию
 $global:DEFAULT_GAME_PATH = "E:\X-Ray Multiplayer Extension\game"
-$global:DEFAULT_SERVERS_DATA_PATH = "E:\xrMPE_Server\app_datas\"
-$global:DEFAULT_DEBUG = $true
+# По умолчанию папка app_datas будет рядом со скриптом
+$global:DEFAULT_SERVERS_DATA_PATH = Join-Path -Path $scriptPath -ChildPath "app_datas\"
+$global:DEFAULT_DEBUG = $false  # Отключена отладка по умолчанию
 $global:DEFAULT_DEBUG_LOG_FILE = "server_debug.log"
 $global:DEFAULT_KILL_SERVERS_ON_START = $true
 $global:DEFAULT_SERVER_HANG_TIMEOUT = 300
@@ -44,17 +45,28 @@ $global:ServersList = New-Object System.Collections.ArrayList
 . "$PSScriptRoot\scripts\ServerManagement.ps1"
 
 # Инициализация файла конфигурации
-Initialize-ConfigFile -ConfigFilePath $configFile
+$configCreated = Initialize-ConfigFile -ConfigFilePath $configFile
+
+# Если конфиг был только что создан, завершаем работу скрипта
+if ($configCreated -eq $true) {
+    Write-Host "`n  Файл конфигурации был создан. Пожалуйста, настройте его и запустите скрипт снова." -ForegroundColor Yellow
+    Write-Host "  Нажмите любую клавишу для выхода..."
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    exit
+}
 
 # Загрузка конфигурации
 $config = Load-Configuration -ConfigFilePath $configFile -ScriptPath $scriptPath
+
+# Проверка и создание папки для данных серверов
+Ensure-AppDatasPath -ServersDataPath $config.ServersDataPath
 
 # Проверка путей
 $paths = Test-RequiredPaths -GamePath $config.GamePath
 
 # Если включена опция завершения процессов при запуске, завершаем все процессы серверов STALKER
 if ($config.KillServersOnStartScript) {
-  Kill-StalkerServers
+    Kill-StalkerServers
 }
 
 # Вывод информации о запуске
@@ -72,18 +84,22 @@ Write-Host "  Расположение окон: $($windowLayout.Columns) сто
 
 # Первоначальный запуск всех серверов
 for ($i = 0; $i -lt $global:ServersList.Count; $i++) {
-  $server = $global:ServersList[$i]
-  
-  Write-Host "  Запуск сервера $($server.Name)..." -NoNewline
-  $process = Start-Server -Server $server -GamePath $config.GamePath -BinPath $paths.BinPath -ServersDataPath $config.ServersDataPath
-  
-  if ($null -ne $process) {
-      $global:ServersList[$i].Process = $process
-      Write-Host " OK" -ForegroundColor Green
-      $global:ServersList[$i].LastResponseTime = Get-Date  # Устанавливаем начальное время ответа
-  } else {
-      Write-Host " ОШИБКА" -ForegroundColor Red
-  }
+    $server = $global:ServersList[$i]
+
+    Write-Host "  Запуск сервера $($server.Name)..." -NoNewline
+
+    # Проверка и создание серверных файлов
+    $serverDataPath = Prepare-ServerDataFiles -Server $server -ServersDataPath $config.ServersDataPath
+
+    $process = Start-Server -Server $server -GamePath $config.GamePath -BinPath $paths.BinPath -ServersDataPath $config.ServersDataPath
+
+    if ($null -ne $process) {
+        $global:ServersList[$i].Process = $process
+        Write-Host " OK" -ForegroundColor Green
+        $global:ServersList[$i].LastResponseTime = Get-Date  # Устанавливаем начальное время ответа
+    } else {
+        Write-Host " ОШИБКА" -ForegroundColor Red
+    }
 }
 
 # Ожидание запуска всех серверов
@@ -96,8 +112,8 @@ Find-ServerWindowsByPID
 
 # Позиционирование окон всех серверов после запуска
 if ($global:ServersList.Count -gt 1) {
-  Write-Host "`n  Позиционирование окон серверов..." -ForegroundColor Yellow
-  Position-ServerWindows -ServerPositions $positions
+    Write-Host "`n  Позиционирование окон серверов..." -ForegroundColor Yellow
+    Position-ServerWindows -ServerPositions $positions
 }
 
 # Запуск мониторинга серверов
