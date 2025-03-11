@@ -44,6 +44,13 @@ $global:ServersList = New-Object System.Collections.ArrayList
 . "$PSScriptRoot\scripts\Notifications.ps1"
 . "$PSScriptRoot\scripts\ServerManagement.ps1"
 
+# Проверка существования папки templates
+$templatesPath = Join-Path -Path $scriptPath -ChildPath "templates"
+if (-not (Test-Path -Path $templatesPath)) {
+    Write-Host "Создание папки с шаблонами..." -ForegroundColor Yellow
+    New-Item -Path $templatesPath -ItemType Directory -Force | Out-Null
+}
+
 # Инициализация файла конфигурации
 $configCreated = Initialize-ConfigFile -ConfigFilePath $configFile
 
@@ -62,7 +69,7 @@ $config = Load-Configuration -ConfigFilePath $configFile -ScriptPath $scriptPath
 Ensure-AppDatasPath -ServersDataPath $config.ServersDataPath
 
 # Проверка путей
-$paths = Test-RequiredPaths -GamePath $config.GamePath
+$paths = Test-RequiredPaths -GamePath $config.GamePath -ServersDataPath $config.ServersDataPath
 
 # Если включена опция завершения процессов при запуске, завершаем все процессы серверов STALKER
 if ($config.KillServersOnStartScript) {
@@ -89,7 +96,7 @@ for ($i = 0; $i -lt $global:ServersList.Count; $i++) {
     Write-Host "  Запуск сервера $($server.Name)..." -NoNewline
 
     # Проверка и создание серверных файлов
-    $serverDataPath = Prepare-ServerDataFiles -Server $server -ServersDataPath $config.ServersDataPath
+    $serverDataPath = Prepare-ServerDataFiles -Server $server -ServersDataPath $config.ServersDataPath -TemplatesPath $templatesPath
 
     $process = Start-Server -Server $server -GamePath $config.GamePath -BinPath $paths.BinPath -ServersDataPath $config.ServersDataPath
 

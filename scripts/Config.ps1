@@ -146,13 +146,26 @@ function Load-Configuration {
 # Функция для проверки путей
 function Test-RequiredPaths {
   param (
-      [string]$GamePath
+      [string]$GamePath,
+      [string]$ServersDataPath
   )
 
   # Проверка существования указанного пути к игре
   if (-not (Test-Path -Path $GamePath)) {
       Write-Host "ОШИБКА: Путь к игре не найден: $GamePath" -ForegroundColor Red
       Write-Host "Пожалуйста, укажите правильный путь в файле конфигурации и запустите скрипт снова." -ForegroundColor Yellow
+      Write-Host "Нажмите любую клавишу для выхода..."
+      $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+      exit
+  }
+
+  # Проверка, находятся ли папки на одном диске
+  $gamePathDrive = Split-Path -Qualifier $GamePath
+  $serversDataPathDrive = Split-Path -Qualifier $ServersDataPath
+
+  if ($gamePathDrive -ne $serversDataPathDrive) {
+      Write-Host "ОШИБКА: Папка игры и папка данных серверов должны находиться на одном диске!" -ForegroundColor Red
+      Write-Host "Пожалуйста, разместите папку данных серверов на том же диске, что и папка игры." -ForegroundColor Yellow
       Write-Host "Нажмите любую клавишу для выхода..."
       $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
       exit
