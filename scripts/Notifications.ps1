@@ -9,17 +9,17 @@ function Send-DiscordNotification {
       [string]$Title = "Уведомление от Менеджера Серверов STALKER",
       [string]$Color = "16711680"  # Красный цвет в десятичном формате
   )
-
+  
   # Проверка наличия URL для webhook
   if ([string]::IsNullOrEmpty($WebhookUrl)) {
       Write-DebugLog "URL для Discord webhook не указан. Уведомление не отправлено." -Color "Yellow"
       return
   }
-
+  
   try {
       # Формирование данных для отправки
       $timestamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss.fffZ"
-
+      
       $payload = @{
           embeds = @(
               @{
@@ -30,13 +30,13 @@ function Send-DiscordNotification {
               }
           )
       }
-
+      
       # Преобразование данных в JSON
       $payloadJson = $payload | ConvertTo-Json -Depth 4
-
+      
       # Отправка запроса
       $response = Invoke-RestMethod -Uri $WebhookUrl -Method Post -Body $payloadJson -ContentType "application/json"
-
+      
       Write-DebugLog "Уведомление в Discord успешно отправлено." -Color "Green"
       return $true
   }

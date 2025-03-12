@@ -126,5 +126,5 @@ if ($global:ServersList.Count -gt 1) {
 # Запуск мониторинга серверов
 Write-Host "`n  Все серверы запущены. Запуск мониторинга..." -ForegroundColor Green
 Start-Sleep -Seconds $global:SERVER_STARTUP_DELAY
-Monitor-Servers -GamePath $config.GamePath -BinPath $paths.BinPath -ServersDataPath $config.ServersDataPath -ConfigFile $configFile -ServerHangTimeout $config.ServerHangTimeout -DiscordWebhookUrl $config.DiscordWebhookUrl -RestartNotificationThreshold $config.RestartNotificationThreshold
+Monitor-Servers -GamePath $config.GamePath -BinPath $paths.BinPath -ServersDataPath $config.ServersDataPath -ConfigFile $configFile -ServerHangTimeout $config.ServerHangTimeout -DiscordWebhookUrl $config.DiscordWebhookUrl -RestartNotificationThreshold $config.RestartNotificationThreshold -TemplatesPath $templatesPath
 
